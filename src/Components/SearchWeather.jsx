@@ -1,7 +1,77 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 
 function SearchWeather() {
+  const [Input, setInput] = useState('');
+  const [data, setData] = useState([])
+  const [Search, setSearch] = useState('London');
+
+  let ComponentMounted=true;
+
+
+  useEffect(() => {
+    const fetchWeather = async()=>{
+      const response=await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${Search}
+      &appid=cbb9ed0f942aa181754fb5b7acb49be8`);
+      if(ComponentMounted){
+        setData(await response.json());
+        console.log(data)
+          
+        
+      }
+      return()=>{
+        ComponentMounted=false
+      }
+    }
+    fetchWeather();
+  
+   
+  }, [])
+  let emoji=null;
+  if (typeof data.main !== "undefined") {
+
+      if (data.weather[0].main === "Clouds") {
+        emoji = "fa-cloud";
+      } else if (data.weather[0].main == "Thunderstorm") {
+        emoji = "fa-bolt";
+      } else if (data.weather[0].main == "Drizzle") {
+        emoji = "fa-cloud-rain";
+      } else if (data.weather[0].main == "Rain") {
+        emoji = "fa-cloud-shower-heavy";
+      } else if (data.weather[0].main == "Snow") {
+        emoji = "fa-snow-flake";
+      } else {
+        emoji = "fa-smong";
+      }
+    
+  } else {
+    return (<div>Loading...</div>);
+  }
+  
+  
+   let temp = data.main ? (data.main.temp - 273.15).toFixed(2) : "";
+   let temp_min= data.main ? (data.main.temp - 273.15).toFixed(2) : "";
+   let temp_max= data.main ? (data.main.temp - 273.15).toFixed(2) : "";
+
+
+    //date
+    let d=new Date();
+    let date=d.getDate();
+    let year=d.getFullYear();
+    let month=d.toLocaleDateString('default',{month:'long'});
+    let day=d.toLocaleDateString('default',{weekday:'long'});
+
+
+    
+    //time
+    let time=d.toLocaleString([],{
+      hour:'2-digit',
+      minute:'2-digit',
+      second:'2-digit'
+
+    })
+  
+
 
   return (
     <div>
@@ -11,7 +81,7 @@ function SearchWeather() {
             <div className="card text-white text-center  border-0">
               <img
                 className="card-img"
-                src="https://source.unsplash.com/900x900/?Nature,Water"
+                src={`https://source.unsplash.com/900x900/?${data.weather[0].main}`}
                 alt="Card image"
               />
               <div className="card-img-overlay">
@@ -39,14 +109,17 @@ function SearchWeather() {
                     </div>
                   </div>
                 </form>
-                <div className="bg-dark bg-opacity-50 py-3">
-                  <h2 className="card-title">Canada</h2>
-                  <p className="card-text lead">Saturday,September 23,2023</p>
+                <div className="bg-dark bg-opacity-50 py-3 ">
+                  <h2 className="card-title">{data.name}</h2>
+                  <p className="card-text lead">{day},{date} ,{year}
+                  <br />
+                  {time}
+                  </p>
                   <hr />
-                  <i className="fas fa-cloud fa-4x"></i>
-                  <h1 className="fw-bolder mb-5">45.56 &deg;C</h1>
-                  <p className="lead fw-bolder mb-0">Cloud</p>
-                  <p className="lead">33.87&deg;C | 65.87&deg;C</p>
+                  <i className={`fas ${emoji} fa-4x`}></i>
+                  <h1 className="fw-bolder mb-5">{temp} &deg;C</h1>
+                  <p className="lead fw-bolder mb-0">{data.weather&&data.weather[0].main}</p>
+                  <p className="lead">{temp_min}&deg;C | {temp_max}&deg;C</p>
                 </div>
               </div>
             </div>
